@@ -32,7 +32,12 @@ static ERRORED: AtomicBool = AtomicBool::new(false);
 #[macro_export]
 macro_rules! eprintln_locked {
     ($($tt:tt)*) => {{
-        {
+        'automa_message: {
+            #[cfg(target_arch = "wasm32")]
+            let captured = crate::automa::capture_message(format_args!($($tt)*));
+            #[cfg(not(target_arch = "wasm32"))]
+            let captured = false;
+            if captured { break 'automa_message; }
             use std::io::Write;
 
             // This is a bit of an abstraction violation because we explicitly

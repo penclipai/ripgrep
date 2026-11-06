@@ -11,6 +11,10 @@ use std::{io, path::Path};
 
 use {grep::matcher::Matcher, termcolor::WriteColor};
 
+#[cfg(any(target_arch = "wasm32", test))]
+#[path = "automa_search.rs"]
+mod automa;
+
 /// The configuration for the search worker.
 ///
 /// Among a few other things, the configuration primarily controls the way we

@@ -11,6 +11,8 @@ use crate::flags::{HiArgs, SearchMode};
 #[macro_use]
 mod messages;
 
+#[cfg(any(target_arch = "wasm32", test))]
+mod automa;
 mod flags;
 mod haystack;
 mod logger;
