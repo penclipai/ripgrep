@@ -1296,6 +1296,15 @@ fn take_hyperlink_config(
 /// fallback mechanisms, such as querying the PWD environment variable, but
 /// otherwise return an error.
 fn current_dir() -> anyhow::Result<PathBuf> {
+    // WASI libc starts at `/`; the browser adapter supplies the authoritative
+    // working directory through PWD. Keep its relative IO and realpath in the
+    // same instance-local directory before the original walker is built.
+    #[cfg(target_os = "wasi")]
+    if let Some(cwd) = std::env::var_os("PWD").filter(|cwd| !cwd.is_empty()) {
+        std::env::set_current_dir(&cwd).map_err(|err| {
+            anyhow::anyhow!("failed to set virtual working directory: {err}")
+        })?;
+    }
     let err = match std::env::current_dir() {
         Err(err) => err,
         Ok(cwd) => return Ok(cwd),
